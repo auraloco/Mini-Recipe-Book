@@ -7,5 +7,16 @@
   <p><strong>Instructions:</strong></p>
   <p>{{recipe.instreuctions}}</p>
 
-  <a href="/recipes" class="back-btn">← Back to All Recipes</a>
+  <div class="recipe-actions">
+    <a href="/recipes" class="btn back-btn">← Back to All Recipes</a>
+    <a href="/recipes/{{recipe.id}}/edit" class="btn edit-btn">Edit</a>
+    <form
+      action="/recipes/{{recipe.id}}/delete"
+      method="POST"
+      class="recipe-form"
+    >
+      <button type="submit" class="btn delete-btn">Delete</button>
+    </form>
+  </div>
+
 </div>
