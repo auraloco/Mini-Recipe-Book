@@ -33,6 +33,11 @@ p {
   font-size: 3rem;
 }
 
+h1 {
+  text-align: center;
+  font-size: 4rem;
+}
+
 h2,
 h3 {
   color: #222;
@@ -62,14 +67,13 @@ li {
   margin-bottom: 15px;
   padding: 15px;
   border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
 /*Form styling*/
 form {
-  background: #fff;
+  background: #b7caa2;
   padding: 20px;
-  border: 1px solid #ddd;
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
@@ -85,17 +89,21 @@ form textarea {
   width: 100%;
   padding: 8px;
   margin-top: 5px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
 }
 
 form button {
   margin-top: 15px;
-  background: #28a745;
+  background: #7aae6b;
   color: white;
   border: none;
-  padding: 10px 15px;
+  padding: 10px 25px;
   border-radius: 5px;
   cursor: pointer;
   transition: background 0.3s ease;
+}
+
+form button:hover {
+  background: #67935b;
 }
