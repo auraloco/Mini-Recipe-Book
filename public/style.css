@@ -1,0 +1,101 @@
+@import url("https://use.typekit.net/rbb5aou.css");
+@import url("https://fonts.googleapis.com/css2?family=Pacifico&display=swap");
+
+body {
+  margin: 0;
+  padding: 0;
+  font-weight: 400;
+  font-family: "calder-dark", sans-serif;
+  font-style: normal;
+  background-color: #c5d6af;
+  color: #333;
+  line-height: 1.6;
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.homepage {
+  display: flex;
+  font-size: 3rem;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+
+.home {
+  font-family: "calder-dark-grit", sans-serif;
+}
+
+p {
+  font-family: "calder-script", sans-serif;
+  font-size: 3rem;
+}
+
+h2,
+h3 {
+  color: #222;
+}
+
+a {
+  text-decoration: none;
+  color: white;
+  background: #007bff;
+  padding: 8px 14px;
+  border-radius: 5px;
+  transition: background 0.3s ease;
+}
+
+a:hover {
+  background: #0056b3;
+}
+
+/* Recipe list*/
+ul {
+  list-style: none;
+  padding: 0;
+}
+
+li {
+  background: 1px solid #ddd;
+  margin-bottom: 15px;
+  padding: 15px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+/*Form styling*/
+form {
+  background: #fff;
+  padding: 20px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+form label {
+  display: block;
+  margin-top: 10px;
+  font-weight: 500;
+}
+
+form input,
+form textarea {
+  width: 100%;
+  padding: 8px;
+  margin-top: 5px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+form button {
+  margin-top: 15px;
+  background: #28a745;
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
