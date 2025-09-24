@@ -51,6 +51,19 @@ app.post("/recipes", (req, res) => {
   );
 });
 
+app.get("/recipes/:id", (req, res) => {
+  const recipeId = req.params.id;
+  db.get("SELECT * FROM recipes WHERE id = ?", [recipeId], (err, row) => {
+    if (err) {
+      return res.status(500).send("Database error");
+    }
+    if (!row) {
+      return res.status(404).send("Recipe not found");
+    }
+    res.render("recipe", { title: row.title, recipe: row });
+  });
+});
+
 app.listen(PORT, () => {
   console.log(`Server running at http://localhost:${PORT}`);
 });

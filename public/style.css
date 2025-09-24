@@ -32,7 +32,7 @@ nav a {
   text-decoration: none;
   color: white;
   padding: 8px 12px;
-  border-radius: 5px;
+  border-radius: 8px;
   transition: background 0.3s ease;
 }
 
@@ -73,7 +73,7 @@ a {
   color: white;
   background: #007bff;
   padding: 8px 14px;
-  border-radius: 5px;
+  border-radius: 8px;
   transition: background 0.3s ease;
 }
 
@@ -124,11 +124,28 @@ form button {
   color: white;
   border: none;
   padding: 10px 25px;
-  border-radius: 5px;
+  border-radius: 8px;
   cursor: pointer;
   transition: background 0.3s ease;
 }
 
 form button:hover {
   background: #67935b;
+}
+
+/*View button*/
+.btn,
+.back-btn {
+  display: inline-block;
+  text-decoration: none;
+  color: white;
+  padding: 10px 18px;
+  border-radius: 8px;
+  transition: background 0.3s ease;
+  background: #9ab397;
+}
+
+.btn:hover,
+.back-btn:hover {
+  background: #7c907a;
 }
