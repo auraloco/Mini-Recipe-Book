@@ -15,6 +15,31 @@ body {
   padding: 20px;
 }
 
+header {
+  padding: 15px;
+  margin-bottom: 20px;
+  border-radius: 8px;
+}
+
+nav {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+}
+
+nav a {
+  background: #9ab397;
+  text-decoration: none;
+  color: white;
+  padding: 8px 12px;
+  border-radius: 5px;
+  transition: background 0.3s ease;
+}
+
+nav a:hover {
+  background: #7c907a;
+}
+
 .homepage {
   display: flex;
   font-size: 3rem;
