@@ -7,16 +7,34 @@
   <p><strong>Instructions:</strong></p>
   <p>{{recipe.instreuctions}}</p>
 
+  <!--Edit and go back button -->
   <div class="recipe-actions">
     <a href="/recipes" class="btn back-btn">← Back to All Recipes</a>
     <a href="/recipes/{{recipe.id}}/edit" class="btn edit-btn">Edit</a>
-    <form
-      action="/recipes/{{recipe.id}}/delete"
-      method="POST"
-      class="recipe-form"
-    >
-      <button type="submit" class="btn delete-btn">Delete</button>
-    </form>
+
+    <!--Delete button and modal -->
+    <button
+      type="button"
+      class="btn delete-btn"
+      id="openDeleteModal"
+    >Delete</button>
+
+    <div id="deleteModal" class="modal">
+      <div class="modal-content">
+        <h2>Are you sure?</h2>
+        <p>This will permanently delete the recipe.</p>
+        <div class="modal-actions">
+          <form action="/recipes/{{recipe.id}}/delete" method="POST">
+            <button type="submit" class="btn confirm-btn">Yes</button>
+          </form>
+          <button
+            type="button"
+            class="btn cancel-btn"
+            id="cancelDelete"
+          >Cancel</button>
+        </div>
+      </div>
+    </div>
   </div>
 
 </div>
