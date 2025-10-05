@@ -22,6 +22,18 @@ app.get("/", (req, res) => {
   res.render("home", { title: "Mini Recipe Book" });
 });
 
+//
+//About page
+app.get("/about", (req, res) => {
+  res.render("about", { title: "About" });
+});
+
+//Contact page
+app.get("/contact", (req, res) => {
+  res.render("contact", { title: "Contact" });
+});
+
+//
 //Show all recipes
 app.get("/recipes", (req, res) => {
   db.all("SELECT * FROM recipes", [], (err, rows) => {
@@ -32,7 +44,8 @@ app.get("/recipes", (req, res) => {
   });
 });
 
-// Show the form
+//
+// Show the form in add recipe
 app.get("/recipes/new", (req, res) => {
   res.render("addRecipe", { title: "Add Recipe" });
 });
@@ -41,7 +54,7 @@ app.get("/recipes/new", (req, res) => {
 app.post("/recipes", (req, res) => {
   const { title, ingredients, instreuctions } = req.body;
   db.run(
-    "INSERT INTO recipes (title, ingredients, instreuctions) VALUES (?, ?, ?)",
+    "INSERT INTO recipes (title, ingredients, instreuctions) VALUES (?, ?, ?, ?)",
     [title, ingredients, instreuctions],
     function (err) {
       if (err) {
@@ -52,46 +65,40 @@ app.post("/recipes", (req, res) => {
   );
 });
 
+//
 //Single recipe view
 app.get("/recipes/:id", (req, res) => {
   const recipeId = req.params.id;
-  db.get("SELECT * FROM recipes WHERE id = ?", [recipeId], (err, row) => {
-    if (err) {
-      return res.status(500).send("Database error");
-    }
-    if (!row) {
-      return res.status(404).send("Recipe not found");
-    }
+  db.get(`SELECT * FROM recipes WHERE id = ?`, [recipeId], (err, row) => {
+    if (err) return res.status(500).send("Database error");
+    if (!row) return res.status(404).send("Recipe not found");
     res.render("recipe", { title: row.title, recipe: row });
   });
 });
 
-//Delete recipe
+//Delete the recipe
 app.post("/recipes/:id/delete", (req, res) => {
   const recipeId = req.params.id;
   db.run("DELETE FROM recipes WHERE id = ?", [recipeId], function (err) {
     if (err) {
       return res.status(500).send("Database error");
     }
+
     res.redirect("/recipes");
   });
 });
 
-//Edit the recipe form
+//Form to edit the recipe
 app.get("/recipes/:id/edit", (req, res) => {
   const recipeId = req.params.id;
   db.get("SELECT * FROM recipes WHERE id = ?", [recipeId], (err, row) => {
-    if (err) {
-      return res.status(500).send("Database error");
-    }
-    if (!row) {
-      return res.status(404).send("Recipe not found");
-    }
+    if (err) return res.status(500).send("Database error");
+    if (!row) return res.status(404).send("Recipe not found");
     res.render("editRecipe", { title: "Edit Recipe", recipe: row });
   });
 });
 
-//Handle the edits
+//Handle the edit, add them to database
 app.post("/recipes/:id/edit", (req, res) => {
   const { title, ingredients, instreuctions } = req.body;
   const recipeId = req.params.id;
