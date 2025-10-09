@@ -102,37 +102,46 @@ app.get("/contact", (req, res) => {
 });
 
 //
-//Show all recipes
+//User specific recipes
 app.get("/recipes", (req, res) => {
-  db.all("SELECT * FROM recipes", [], (err, rows) => {
-    if (err) {
-      return res.status(500).send("Database error");
+  if (!req.session.user) return res.redirect("/login");
+
+  db.all(
+    "SELECT * FROM recipes WHERE user_id = ?",
+    [req.session.user.id],
+    (err, rows) => {
+      if (err) {
+        return res.status(500).send("Database error");
+      }
+      res.render("recipes", { title: "My Recipes", recipes: rows });
     }
-    res.render("recipes", { title: "All Recipes", recipes: rows });
-  });
+  );
 });
 
 //
 //Show the form in add recipe
 app.get("/recipes/new", (req, res) => {
+  if (!req.session.user) return res.redirect("/login");
   res.render("addRecipe", { title: "Add Recipe" });
 });
 
 //Protected route
 //Handle form submission
-app.get("/recipes/new", (req, res) => {
+/*app.get("/recipes/new", (req, res) => {
   if ((!req, session.user)) {
     return res.redirect("/login");
   }
   res.render("addRecipe", { title: "Add Recipe" });
-});
+});*/
 
 app.post("/recipes", (req, res) => {
   if (!req.session.user) return res.redirect("/login");
+
   const { title, ingredients, instreuctions } = req.body;
+
   db.run(
-    "INSERT INTO recipes (title, ingredients, instreuctions) VALUES (?, ?, ?, ?)",
-    [title, ingredients, instreuctions],
+    "INSERT INTO recipes (title, ingredients, instreuctions, user_id) VALUES (?, ?, ?, ?)",
+    [title, ingredients, instreuctions, req.session.user.id],
     function (err) {
       if (err) {
         return res.status(500).send("Database error");
@@ -145,49 +154,68 @@ app.post("/recipes", (req, res) => {
 //
 //Single recipe view
 app.get("/recipes/:id", (req, res) => {
-  const recipeId = req.params.id;
-  db.get(`SELECT * FROM recipes WHERE id = ?`, [recipeId], (err, row) => {
-    if (err) return res.status(500).send("Database error");
-    if (!row) return res.status(404).send("Recipe not found");
-    res.render("recipe", { title: row.title, recipe: row });
-  });
-});
+  if (!req.session.user) return res.redirect("/login");
 
-//Delete the recipe
-app.post("/recipes/:id/delete", (req, res) => {
   const recipeId = req.params.id;
-  db.run("DELETE FROM recipes WHERE id = ?", [recipeId], function (err) {
-    if (err) {
-      return res.status(500).send("Database error");
+
+  db.get(
+    `SELECT * FROM recipes WHERE id = ? AND user_id = ?`,
+    [recipeId, req.session.user.id],
+    (err, row) => {
+      if (err) return res.status(500).send("Database error");
+      if (!row) return res.status(404).send("Recipe not found");
+      res.render("recipe", { title: row.title, recipe: row });
     }
-
-    res.redirect("/recipes");
-  });
+  );
 });
 
 //Form to edit the recipe
 app.get("/recipes/:id/edit", (req, res) => {
+  if (!req.session.user) return res.redirect("/login");
+
   const recipeId = req.params.id;
-  db.get("SELECT * FROM recipes WHERE id = ?", [recipeId], (err, row) => {
-    if (err) return res.status(500).send("Database error");
-    if (!row) return res.status(404).send("Recipe not found");
-    res.render("editRecipe", { title: "Edit Recipe", recipe: row });
-  });
+
+  db.get(
+    "SELECT * FROM recipes WHERE id = ? AND user_id = ?",
+    [recipeId, req.session.user.id],
+    (err, row) => {
+      if (err) return res.status(500).send("Database error");
+      if (!row) return res.status(404).send("Recipe not found");
+      res.render("editRecipe", { title: "Edit Recipe", recipe: row });
+    }
+  );
 });
 
 //Handle the edit, add them to database
 app.post("/recipes/:id/edit", (req, res) => {
+  if (!req.session.user) return res.redirect("/login");
+
   const { title, ingredients, instreuctions } = req.body;
   const recipeId = req.params.id;
 
   db.run(
-    "UPDATE recipes SET title = ?, ingredients = ?, instreuctions = ? WHERE id = ?",
-    [title, ingredients, instreuctions, recipeId],
+    "UPDATE recipes SET title = ?, ingredients = ?, instreuctions = ? WHERE id = ? AND user_id = ?",
+    [title, ingredients, instreuctions, recipeId, req.session.user.id],
     function (err) {
       if (err) {
         return res.status(500).send("Database error");
       }
       res.redirect(`/recipes/${recipeId}`);
+    }
+  );
+});
+
+//Delete the recipe
+app.post("/recipes/:id/delete", (req, res) => {
+  if (!req.session.user) return res.redirect("/login");
+
+  const recipeId = req.params.id;
+  db.run(
+    "DELETE FROM recipes WHERE id = ? AND user_id = ?",
+    [recipeId, req.session.user.id],
+    function (err) {
+      if (err) return res.status(500).send("Database error");
+      res.redirect("/recipes");
     }
   );
 });
