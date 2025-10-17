@@ -12,6 +12,36 @@ body {
   line-height: 1.6;
 }
 
+/*Flash messages*/
+.flash-message {
+  text-align: center;
+  padding: 10px 15px;
+  border-radius: 8px;
+  margin: 15px 0;
+  font-family: "calder-dark-grit", sans-serif;
+  animation: fadeOut 1s ease-in-out 3s forwards;
+}
+
+.flash-message.success {
+  background-color: #a8d5a2;
+  color: #2e5c2e;
+  border: 1px solid #7bbf73;
+}
+
+.flash-message.error {
+  background-color: #f2b6b6;
+  color: #6a1e1e;
+  border: 1px solid #d27a7a;
+}
+
+@keyframes fadeOut {
+  to {
+    opacity: 0;
+    transform: translateY(-10px);
+    visibility: hidden;
+  }
+}
+
 /*Typography*/
 h1 {
   text-align: center;

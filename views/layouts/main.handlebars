@@ -29,6 +29,11 @@
       </nav>
     </header>
     <main>
+      {{#if message}}
+        <div class="flash-message {{message.type}}">
+          {{message.text}}
+        </div>
+      {{/if}}
       {{{body}}}
     </main>
     <script src="/script.js"></script>

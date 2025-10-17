@@ -3,6 +3,7 @@ const exphbs = require("express-handlebars");
 const sqlite3 = require("sqlite3").verbose();
 const session = require("express-session");
 const bcrypt = require("bcrypt");
+const { text } = require("body-parser");
 
 const app = express();
 const PORT = 3000;
@@ -31,6 +32,8 @@ app.set("views", "./views");
 //Middleware to make the session data accessible in the templates
 app.use((req, res, next) => {
   res.locals.user = req.session.user;
+  res.locals.message = req.session.message;
+  delete req.session.message;
   next();
 });
 
@@ -55,8 +58,16 @@ app.post("/signup", async (req, res) => {
     [username, hashedPassword],
     (err) => {
       if (err) {
-        return res.send("Username already exists!");
+        req.session.message = {
+          type: "error",
+          text: "Username already exists!",
+        };
+        return res.redirect("/signup");
       }
+      req.session.message = {
+        type: "success",
+        text: "Account created! Please log in.",
+      };
       res.redirect("/login");
     }
   );
@@ -73,13 +84,19 @@ app.post("/login", (req, res) => {
     "SELECT * FROM users WHERE username = ?",
     [username],
     async (err, user) => {
-      if (err || !user) return res.send("User not found.");
+      if (err || !user) {
+        req.session.message = { type: "error", text: "User not found." };
+        return res.redirect("/login");
+      }
+
       const match = await bcrypt.compare(password, user.password);
       if (match) {
         req.session.user = { id: user.id, username: user.username };
+        req.session.message = { type: "success", text: "Login successful!" };
         res.redirect("/recipes");
       } else {
-        res.send("Incorrect password.");
+        req.session.message = { type: "error", text: "Incorrect password." };
+        res.redirect("/login");
       }
     }
   );
@@ -104,7 +121,13 @@ app.get("/contact", (req, res) => {
 //
 //User specific recipes
 app.get("/recipes", (req, res) => {
-  if (!req.session.user) return res.redirect("/login");
+  if (!req.session.user) {
+    req.session.message = {
+      type: "error",
+      text: "Please log in to view your recipes.",
+    };
+    return re.redirect("/login");
+  }
 
   db.all(
     "SELECT * FROM recipes WHERE user_id = ?",
@@ -121,18 +144,15 @@ app.get("/recipes", (req, res) => {
 //
 //Show the form in add recipe
 app.get("/recipes/new", (req, res) => {
-  if (!req.session.user) return res.redirect("/login");
-  res.render("addRecipe", { title: "Add Recipe" });
-});
-
-//Protected route
-//Handle form submission
-/*app.get("/recipes/new", (req, res) => {
-  if ((!req, session.user)) {
+  if (!req.session.user) {
+    req.session.message = {
+      type: "error",
+      text: "Please log in to add a recipe.",
+    };
     return res.redirect("/login");
   }
   res.render("addRecipe", { title: "Add Recipe" });
-});*/
+});
 
 app.post("/recipes", (req, res) => {
   if (!req.session.user) return res.redirect("/login");
@@ -146,6 +166,10 @@ app.post("/recipes", (req, res) => {
       if (err) {
         return res.status(500).send("Database error");
       }
+      req.session.message = {
+        type: "success",
+        text: "Recipe added successfully!",
+      };
       res.redirect("/recipes"); //go back to the recipes list
     }
   );
@@ -156,11 +180,9 @@ app.post("/recipes", (req, res) => {
 app.get("/recipes/:id", (req, res) => {
   if (!req.session.user) return res.redirect("/login");
 
-  const recipeId = req.params.id;
-
   db.get(
     `SELECT * FROM recipes WHERE id = ? AND user_id = ?`,
-    [recipeId, req.session.user.id],
+    [req.params.id, req.session.user.id],
     (err, row) => {
       if (err) return res.status(500).send("Database error");
       if (!row) return res.status(404).send("Recipe not found");
@@ -173,11 +195,9 @@ app.get("/recipes/:id", (req, res) => {
 app.get("/recipes/:id/edit", (req, res) => {
   if (!req.session.user) return res.redirect("/login");
 
-  const recipeId = req.params.id;
-
   db.get(
     "SELECT * FROM recipes WHERE id = ? AND user_id = ?",
-    [recipeId, req.session.user.id],
+    [req.params.id, req.session.user.id],
     (err, row) => {
       if (err) return res.status(500).send("Database error");
       if (!row) return res.status(404).send("Recipe not found");
@@ -191,16 +211,19 @@ app.post("/recipes/:id/edit", (req, res) => {
   if (!req.session.user) return res.redirect("/login");
 
   const { title, ingredients, instreuctions } = req.body;
-  const recipeId = req.params.id;
 
   db.run(
     "UPDATE recipes SET title = ?, ingredients = ?, instreuctions = ? WHERE id = ? AND user_id = ?",
-    [title, ingredients, instreuctions, recipeId, req.session.user.id],
+    [title, ingredients, instreuctions, req.params.id, req.session.user.id],
     function (err) {
       if (err) {
         return res.status(500).send("Database error");
       }
-      res.redirect(`/recipes/${recipeId}`);
+      req.session.message = {
+        type: "success",
+        text: "Recipe updated successfully!",
+      };
+      res.redirect(`/recipes/${req.params.id}`);
     }
   );
 });
@@ -209,12 +232,12 @@ app.post("/recipes/:id/edit", (req, res) => {
 app.post("/recipes/:id/delete", (req, res) => {
   if (!req.session.user) return res.redirect("/login");
 
-  const recipeId = req.params.id;
   db.run(
     "DELETE FROM recipes WHERE id = ? AND user_id = ?",
-    [recipeId, req.session.user.id],
+    [req.params.id, req.session.user.id],
     function (err) {
       if (err) return res.status(500).send("Database error");
+      req.session.message = { type: "error", text: "Recipe deleted!" };
       res.redirect("/recipes");
     }
   );
