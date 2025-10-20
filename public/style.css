@@ -206,3 +206,21 @@ li {
 .info-page {
   text-align: center;
 }
+
+/*Pagination*/
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 20px;
+  margin-top: 20px;
+}
+
+.pagination span {
+  color: #79bd71;
+}
+
+.page-btn {
+  text-decoration: none;
+  color: #2e5c2e;
+}

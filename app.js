@@ -25,7 +25,16 @@ app.use(
 const db = new sqlite3.Database("./database.db");
 
 //Set up handlebars
-app.engine("handlebars", exphbs.engine());
+const hbs = exphbs.create({
+  helpers: {
+    increment: (value) => value + 1,
+    decrement: (value) => value - 1,
+    gt: (a, b) => a > b,
+    lt: (a, b) => a < b,
+    eq: (a, b) => a === b,
+  },
+});
+app.engine("handlebars", hbs.engine);
 app.set("view engine", "handlebars");
 app.set("views", "./views");
 
@@ -36,9 +45,6 @@ app.use((req, res, next) => {
   delete req.session.message;
   next();
 });
-
-//
-//Routes
 
 //Home
 app.get("/", (req, res) => {
@@ -119,24 +125,49 @@ app.get("/contact", (req, res) => {
 });
 
 //
-//User specific recipes
+// User specific recipes with pagination
 app.get("/recipes", (req, res) => {
   if (!req.session.user) {
     req.session.message = {
       type: "error",
       text: "Please log in to view your recipes.",
     };
-    return re.redirect("/login");
+    return res.redirect("/login");
   }
 
-  db.all(
-    "SELECT * FROM recipes WHERE user_id = ?",
-    [req.session.user.id],
-    (err, rows) => {
-      if (err) {
-        return res.status(500).send("Database error");
-      }
-      res.render("recipes", { title: "My Recipes", recipes: rows });
+  const userId = req.session.user.id;
+  const limit = 3;
+  const page = parseInt(req.query.page) || 1;
+  const offset = (page - 1) * limit;
+
+  //Total recipes
+  db.get(
+    "SELECT COUNT(*) AS count FROM recipes WHERE user_id = ?",
+    [userId],
+    (err, result) => {
+      if (err) return res.status(500).send("Database error");
+
+      const totalRecipes = result.count;
+      const totalPages = Math.ceil(totalRecipes / limit);
+
+      //Get recipes for this page
+      db.all(
+        "SELECT * FROM recipes WHERE user_id = ? LIMIT ? OFFSET ?",
+        [userId, limit, offset],
+        (err, rows) => {
+          if (err) return res.status(500).send("Database error");
+
+          const pages = Array.from({ length: totalPages }, (_, i) => i + 1);
+
+          res.render("recipes", {
+            title: "My Recipes",
+            recipes: rows,
+            currentPage: page,
+            totalPages,
+            pages,
+          });
+        }
+      );
     }
   );
 });
