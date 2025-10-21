@@ -136,11 +136,11 @@ app.get("/recipes", (req, res) => {
   }
 
   const userId = req.session.user.id;
-  const limit = 3;
+  const limit = 3; // recipes per page
   const page = parseInt(req.query.page) || 1;
   const offset = (page - 1) * limit;
 
-  //Total recipes
+  // Count total recipes for this user
   db.get(
     "SELECT COUNT(*) AS count FROM recipes WHERE user_id = ?",
     [userId],
@@ -150,9 +150,14 @@ app.get("/recipes", (req, res) => {
       const totalRecipes = result.count;
       const totalPages = Math.ceil(totalRecipes / limit);
 
-      //Get recipes for this page
+      // Fetch recipes with INNER JOIN (make sure to prefix user_id with table name!)
       db.all(
-        "SELECT * FROM recipes WHERE user_id = ? LIMIT ? OFFSET ?",
+        `SELECT recipes.*, categories.name AS category_name
+         FROM recipes
+         INNER JOIN categories ON recipes.category_id = categories.id
+         WHERE recipes.user_id = ?
+         ORDER BY recipes.id DESC
+         LIMIT ? OFFSET ?`,
         [userId, limit, offset],
         (err, rows) => {
           if (err) return res.status(500).send("Database error");
@@ -188,11 +193,11 @@ app.get("/recipes/new", (req, res) => {
 app.post("/recipes", (req, res) => {
   if (!req.session.user) return res.redirect("/login");
 
-  const { title, ingredients, instreuctions } = req.body;
+  const { title, ingredients, instreuctions, category_id } = req.body;
 
   db.run(
-    "INSERT INTO recipes (title, ingredients, instreuctions, user_id) VALUES (?, ?, ?, ?)",
-    [title, ingredients, instreuctions, req.session.user.id],
+    "INSERT INTO recipes (title, ingredients, instreuctions, category_id, user_id) VALUES (?, ?, ?, ?, ?)",
+    [title, ingredients, instreuctions, category_id, req.session.user.id],
     function (err) {
       if (err) {
         return res.status(500).send("Database error");
