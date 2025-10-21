@@ -152,7 +152,7 @@ app.get("/recipes", (req, res) => {
 
       //Get recipes for this page
       db.all(
-        "SELECT recipes.*, categories.name AS category_name FROM recipes INNER JOIN categories ON recipes.category_id = categories.id WHERE user_id = ? LIMIT ? OFFSET ?",
+        "SELECT * FROM recipes WHERE user_id = ? LIMIT ? OFFSET ?",
         [userId, limit, offset],
         (err, rows) => {
           if (err) return res.status(500).send("Database error");
@@ -188,11 +188,11 @@ app.get("/recipes/new", (req, res) => {
 app.post("/recipes", (req, res) => {
   if (!req.session.user) return res.redirect("/login");
 
-  const { title, ingredients, instreuctions, category_id } = req.body;
+  const { title, ingredients, instreuctions } = req.body;
 
   db.run(
-    "INSERT INTO recipes (title, ingredients, instreuctions, category_id, user_id) VALUES (?, ?, ?, ?, ?)",
-    [title, ingredients, instreuctions, category_id, req.session.user.id],
+    "INSERT INTO recipes (title, ingredients, instreuctions, user_id) VALUES (?, ?, ?, ?)",
+    [title, ingredients, instreuctions, req.session.user.id],
     function (err) {
       if (err) {
         return res.status(500).send("Database error");
@@ -212,10 +212,7 @@ app.get("/recipes/:id", (req, res) => {
   if (!req.session.user) return res.redirect("/login");
 
   db.get(
-    `SELECT recipes.*, categories.name AS category_name
-     FROM recipes
-     INNER JOIN categories ON recipes.category_id = categories.id
-     WHERE recipes.id = ? AND recipes.user_id = ?`,
+    `SELECT * FROM recipes WHERE id = ? AND user_id = ?`,
     [req.params.id, req.session.user.id],
     (err, row) => {
       if (err) return res.status(500).send("Database error");
@@ -229,45 +226,33 @@ app.get("/recipes/:id", (req, res) => {
 app.get("/recipes/:id/edit", (req, res) => {
   if (!req.session.user) return res.redirect("/login");
 
-  // Get categories first
-  db.all("SELECT * FROM categories", (err, categories) => {
-    if (err) return res.status(500).send("Database error");
+  // Then get the recipe
+  db.get(
+    "SELECT * FROM recipes WHERE id = ? AND user_id = ?",
+    [req.params.id, req.session.user.id],
+    (err, row) => {
+      if (err) return res.status(500).send("Database error");
+      if (!row) return res.status(404).send("Recipe not found");
 
-    // Then get the recipe
-    db.get(
-      "SELECT * FROM recipes WHERE id = ? AND user_id = ?",
-      [req.params.id, req.session.user.id],
-      (err, row) => {
-        if (err) return res.status(500).send("Database error");
-        if (!row) return res.status(404).send("Recipe not found");
-
-        // Render with both recipe and categories
-        res.render("editRecipe", {
-          title: "Edit Recipe",
-          recipe: row,
-          categories,
-        });
-      }
-    );
-  });
+      // Render with both recipe and categories
+      res.render("editRecipe", {
+        title: "Edit Recipe",
+        recipe: row,
+        categories,
+      });
+    }
+  );
 });
 
 //Handle the edit, add them to database
 app.post("/recipes/:id/edit", (req, res) => {
   if (!req.session.user) return res.redirect("/login");
 
-  const { title, ingredients, instreuctions, category_id } = req.body;
+  const { title, ingredients, instreuctions } = req.body;
 
   db.run(
-    "UPDATE recipes SET title = ?, ingredients = ?, instreuctions = ?, category_id = ? WHERE id = ? AND user_id = ?",
-    [
-      title,
-      ingredients,
-      instreuctions,
-      category_id,
-      req.params.id,
-      req.session.user.id,
-    ],
+    "UPDATE recipes SET title = ?, ingredients = ?, instreuctions = ? WHERE id = ? AND user_id = ?",
+    [title, ingredients, instreuctions, req.params.id, req.session.user.id],
     function (err) {
       if (err) {
         return res.status(500).send("Database error");

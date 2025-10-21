@@ -10,15 +10,6 @@
     required
   /><br /><br />
 
-  <label for="category">Category:</label> <br />
-  <select id="category" name="category_id" required>
-    {{#each categories}}
-    <option value="{{this.id}}" {{#if (eq this.id ../recipe.category_id)}}selected{{/if}}>
-    {{this.name}}
-    </option>
-    {{/each}}
-  </select> <br /><br />
-
   <label for="ingredients">Ingredients:</label><br />
   <textarea
     id="ingredients"
