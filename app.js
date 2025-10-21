@@ -216,15 +216,17 @@ app.post("/recipes", (req, res) => {
 app.get("/recipes/:id", (req, res) => {
   if (!req.session.user) return res.redirect("/login");
 
-  db.get(
-    `SELECT * FROM recipes WHERE id = ? AND user_id = ?`,
-    [req.params.id, req.session.user.id],
-    (err, row) => {
-      if (err) return res.status(500).send("Database error");
-      if (!row) return res.status(404).send("Recipe not found");
-      res.render("recipe", { title: row.title, recipe: row });
+  //Had a hard time with showing categories in single recipe view so chatgpt had to step in and help
+  const sql = `SELECT recipes.*, categories.name AS category_name FROM recipes LEFT JOIN categories ON recipes.category_id = categories.id WHERE recipes.id = ? AND recipes.user_id = ?`;
+
+  db.get(sql, [req.params.id, req.session.user.id], (err, row) => {
+    if (err) {
+      console.error(err);
+      return res.status(500).send("Database error");
     }
-  );
+    if (!row) return res.status(404).send("Recipe not found");
+    res.render("recipe", { title: row.title, recipe: row });
+  });
 });
 
 //Form to edit the recipe

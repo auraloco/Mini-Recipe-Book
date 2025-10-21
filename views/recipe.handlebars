@@ -1,6 +1,11 @@
 <h1>{{recipe.title}}</h1>
 
 <div class="recipe-detail">
+  {{#if recipe.category_name}}
+    <p><strong>Category:</strong> {{recipe.category_name}}</p>
+  {{else}}
+    <p><strong>Category:</strong>Uncategorized</p>
+  {{/if}}
   <p><strong>Ingredients:</strong>{{recipe.ingredients}}</p>
   <p><strong>Instructions:</strong>{{recipe.instreuctions}}</p>
 
