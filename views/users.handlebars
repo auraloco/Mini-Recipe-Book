@@ -1,0 +1,20 @@
+<!--shows users in this page for admins. Buttons for delete and edit-->
+<h1>User Management</h1>
+
+<ul>
+  {{#each users}}
+    <li>
+      <strong>{{this.username}}</strong>
+      <a href="/users/{{this.id}}/edit" class="btn edituser-btn">Edit</a>
+      <form
+        action="/users/{{this.id}}/delete"
+        method="POST"
+        style="display: inline;"
+      >
+        <button type="submit" class="btn delete-btn">Delete</button>
+      </form>
+    </li>
+  {{/each}}
+</ul>
+
+<a href="/recipes" class="btn">← Back to Recipes</a>

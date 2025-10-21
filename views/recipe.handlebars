@@ -1,6 +1,8 @@
+<!--Single recipe view-->
 <h1>{{recipe.title}}</h1>
 
 <div class="recipe-detail">
+  <!--if the recipe haves category, show. If not show uncategorized-->
   {{#if recipe.category_name}}
     <p><strong>Category:</strong> {{recipe.category_name}}</p>
   {{else}}

@@ -8,17 +8,28 @@
   <body>
     <header>
       <nav>
-        <div class="nav-center">
+        <!--Hamburger menu for responsivness -->
+        <div class="nav-left">
+          <button class="hamburger" id="hamburger">☰</button>
+        </div>
+
+        <div class="nav-center" id="navLinks">
           <a href="/">Home</a>
+
+          <!--Only logged in users will see this and be able to go in-->
           {{#if user}}
             <a href="/recipes">My Recipes</a>
             <a href="/recipes/new">Add Recipe</a>
+
+            <!-- Only show the Users button if  user is admin -->
+            {{#if (eq user.username "admin")}}
+              <a href="/users">Users</a>
+            {{/if}}
           {{/if}}
+
           <a href="/about">About</a>
           <a href="/contact">Contact</a>
-        </div>
 
-        <div class="nav-right">
           {{#if user}}
             <a href="/logout" class="auth-btn">Log out</a>
           {{else}}
@@ -29,6 +40,7 @@
       </nav>
     </header>
     <main>
+      <!--Flash messages-->
       {{#if message}}
         <div class="flash-message {{message.type}}">
           {{message.text}}

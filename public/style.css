@@ -2,6 +2,12 @@
 @import url("https://use.typekit.net/rbb5aou.css");
 @import url("https://fonts.googleapis.com/css2?family=Pacifico&display=swap");
 
+html,
+body {
+  min-height: 100%;
+  overflow-x: hidden;
+}
+
 body {
   margin: 0 auto;
   padding: 20 px;
@@ -74,11 +80,6 @@ nav {
   gap: 10px;
   justify-content: center;
   flex-grow: 1;
-}
-
-.nav-right {
-  display: flex;
-  gap: 10px;
 }
 
 nav a {
@@ -250,6 +251,16 @@ li {
   color: #2e5c2e;
 }
 
+/*Hamburger menu*/
+.hamburger {
+  display: none;
+  font-size: 2rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #2e5c2e;
+}
+
 /*Keyframes*/
 @keyframes shadow-drop-center {
   0% {
@@ -265,5 +276,73 @@ li {
     opacity: 0;
     transform: translateY(-10px);
     visibility: hidden;
+  }
+}
+
+/*Responsive*/
+@media (max-width: 810px) {
+  body {
+    padding: 10px;
+    max-width: 100%;
+  }
+
+  nav {
+    position: relative;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .hamburger {
+    display: block;
+  }
+
+  .nav-center {
+    display: none;
+    flex-direction: column;
+    width: 100%;
+    background: #9ab397;
+    border-radius: 8px;
+    padding: 10px 0;
+    margin-top: 10px;
+    max-height: none;
+  }
+
+  .nav-center.active {
+    display: flex;
+  }
+
+  nav a {
+    display: block;
+    text-align: center;
+    padding: 12px;
+    background: transparent;
+  }
+
+  nav a:hover {
+    background: rgba(255, 255, 255, 0.2);
+  }
+
+  h1 {
+    font-size: 2.5rem;
+  }
+
+  p {
+    font-size: 1.8rem;
+  }
+
+  .btn {
+    width: 90%;
+    text-align: center;
+  }
+
+  ul li {
+    padding: 10px;
+    margin-bottom: 25px;
+  }
+
+  form input,
+  form textarea,
+  form select {
+    font-size: 1rem;
   }
 }

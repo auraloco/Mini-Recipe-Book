@@ -1,0 +1,14 @@
+<h1>Edit User</h1>
+
+<!--Form to edit the users info-->
+<form action="/users/{{user.id}}/edit" method="POST">
+  <label>Username:</label>
+  <input type="text" name="username" value="{{user.username}}" required />
+
+  <label>New Password:</label>
+  <input type="password" name="password" required />
+
+  <button type="submit" class="btn">Save Changes</button>
+</form>
+
+<a href="/users" class="btn">← Back to Users</a>

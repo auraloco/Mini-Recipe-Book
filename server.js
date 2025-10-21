@@ -1,3 +1,16 @@
+/*
+Aura Coruña - coau24sn.ju.se
+
+Target grade: 5
+
+Project Web Dev Fun - 2025
+
+Administrator login: admin
+Administrator password: "wdf#2025" ----> "$2b$10$d4i1dOIg4d9VjT3bHHcoOe2mJW1vP9Vi0L8a1IUShmRSZz6zQZK4i"
+
+-Some code in this project where generated with the help of ChatGPT
+*/
+
 const express = require("express");
 const exphbs = require("express-handlebars");
 const sqlite3 = require("sqlite3").verbose();
@@ -38,7 +51,7 @@ app.engine("handlebars", hbs.engine);
 app.set("view engine", "handlebars");
 app.set("views", "./views");
 
-//Middleware to make the session data accessible in the templates
+//Make the session data accessible in the templates
 app.use((req, res, next) => {
   res.locals.user = req.session.user;
   res.locals.message = req.session.message;
@@ -56,6 +69,7 @@ app.get("/signup", (re, res) => {
   res.render("signup", { title: "Sign Up" });
 });
 
+//Handle sign up submission form
 app.post("/signup", async (req, res) => {
   const { username, password } = req.body;
   const hashedPassword = await bcrypt.hash(password, 10);
@@ -84,6 +98,7 @@ app.get("/login", (req, res) => {
   res.render("login", { title: "Login" });
 });
 
+//Handle log in form
 app.post("/login", (req, res) => {
   const { username, password } = req.body;
   db.get(
@@ -112,6 +127,78 @@ app.post("/login", (req, res) => {
 app.get("/logout", (req, res) => {
   req.session.destroy();
   res.redirect("/");
+});
+
+//Admin
+//List of all users
+app.get("/users", (req, res) => {
+  if (!req.session.user) return res.redirect("/login");
+
+  //Only allow specific admin user
+  if (req.session.user.username !== "admin") {
+    req.session.message = {
+      type: "error",
+      text: "Acess denied: Admins only.",
+    };
+    return res.redirect("/recipes");
+  }
+
+  db.all("SELECT id, username FROM users", (err, users) => {
+    if (err) return res.status(500).send("Database error");
+    res.render("users", { title: "Users Management", users });
+  });
+});
+
+//Edit user form
+app.get("/users/:id/edit", (req, res) => {
+  if (!req.session.user || req.session.user.username !== "admin") {
+    req.session.message = { type: "error", text: "Access denied." };
+    return res.redirect("/login");
+  }
+
+  db.get(
+    "SELECT id, username FROM users WHERE id = ?",
+    [req.params.id],
+    (err, user) => {
+      if (err) return res.status(500).send("Database error");
+      if (!user) return res.status(404).send("User not found");
+      res.render("editUsers", { title: "Edit User", user });
+    }
+  );
+});
+
+//Handle the user update
+app.post("/users/:id/edit", async (req, res) => {
+  if (!req.session.user || req.session.user.username !== "admin") {
+    req.session.message = { type: "error", text: "Access denied." };
+    return res.redirect("/login");
+  }
+
+  const { username, password } = req.body;
+  const hashedPassword = await bcrypt.hash(password, 10);
+
+  db.run(
+    "UPDATE users SET username = ?, password = ? WHERE id = ?",
+    [username, hashedPassword, req.params.id],
+    (err) => {
+      if (err) return res.status(500).send("Database error");
+      req.session.message = { type: "success", text: "User info updated!" };
+      res.redirect("/users");
+    }
+  );
+});
+
+//Delete user
+app.post("/users/:id/delete", (req, res) => {
+  if (!req.session.user || req.session.user.username !== "admin") {
+    return res.redirect("/login");
+  }
+
+  db.run("DELETE FROM users WHERE id = ?", [req.params.id], (err) => {
+    if (err) return res.status(500).send("Database error");
+    req.session.message = { type: "error", text: "User deleted!" };
+    res.redirect("/users");
+  });
 });
 
 //About page
