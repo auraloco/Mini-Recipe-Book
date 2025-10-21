@@ -136,11 +136,11 @@ app.get("/recipes", (req, res) => {
   }
 
   const userId = req.session.user.id;
-  const limit = 3; // recipes per page
+  const limit = 3;
   const page = parseInt(req.query.page) || 1;
   const offset = (page - 1) * limit;
 
-  // Count total recipes for this user
+  //Count the total of recipes for this user
   db.get(
     "SELECT COUNT(*) AS count FROM recipes WHERE user_id = ?",
     [userId],
@@ -150,7 +150,7 @@ app.get("/recipes", (req, res) => {
       const totalRecipes = result.count;
       const totalPages = Math.ceil(totalRecipes / limit);
 
-      // Fetch recipes with INNER JOIN (make sure to prefix user_id with table name!)
+      //Get recipes
       db.all(
         `SELECT recipes.*, categories.name AS category_name
          FROM recipes
@@ -206,7 +206,7 @@ app.post("/recipes", (req, res) => {
         type: "success",
         text: "Recipe added successfully!",
       };
-      res.redirect("/recipes"); //go back to the recipes list
+      res.redirect("/recipes");
     }
   );
 });
@@ -231,19 +231,22 @@ app.get("/recipes/:id", (req, res) => {
 app.get("/recipes/:id/edit", (req, res) => {
   if (!req.session.user) return res.redirect("/login");
 
-  // Then get the recipe
   db.get(
     "SELECT * FROM recipes WHERE id = ? AND user_id = ?",
     [req.params.id, req.session.user.id],
-    (err, row) => {
+    (err, recipe) => {
       if (err) return res.status(500).send("Database error");
-      if (!row) return res.status(404).send("Recipe not found");
+      if (!recipe) return res.status(404).send("Recipe not found");
 
-      // Render with both recipe and categories
-      res.render("editRecipe", {
-        title: "Edit Recipe",
-        recipe: row,
-        categories,
+      //Get categories
+      db.all("SELECT * FROM categories", (err, categories) => {
+        if (err) return res.status(500).send("Database error");
+
+        res.render("editRecipe", {
+          title: "Edit Recipe",
+          recipe,
+          categories,
+        });
       });
     }
   );
@@ -253,11 +256,18 @@ app.get("/recipes/:id/edit", (req, res) => {
 app.post("/recipes/:id/edit", (req, res) => {
   if (!req.session.user) return res.redirect("/login");
 
-  const { title, ingredients, instreuctions } = req.body;
+  const { title, ingredients, instreuctions, category_id } = req.body;
 
   db.run(
-    "UPDATE recipes SET title = ?, ingredients = ?, instreuctions = ? WHERE id = ? AND user_id = ?",
-    [title, ingredients, instreuctions, req.params.id, req.session.user.id],
+    "UPDATE recipes SET title = ?, ingredients = ?, instreuctions = ?, category_id= ? WHERE id = ? AND user_id = ?",
+    [
+      title,
+      ingredients,
+      instreuctions,
+      category_id,
+      req.params.id,
+      req.session.user.id,
+    ],
     function (err) {
       if (err) {
         return res.status(500).send("Database error");
